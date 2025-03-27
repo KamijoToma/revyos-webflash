@@ -31,10 +31,13 @@
             <h2>Step 5: Flash Files to Device</h2>
             <label>uboot.bin:</label>
             <input type="file" @change="onFileSelected('ubootBin', $event)" />
+            <br>
             <label>boot.ext4:</label>
             <input type="file" @change="onFileSelected('bootExt4', $event)" />
+            <br>
             <label>root.ext4:</label>
             <input type="file" @change="onFileSelected('rootExt4', $event)" />
+            <br>
             <button @click="flashFilesToDevice"
                 :disabled="!files.ubootBin || !files.bootExt4 || !files.rootExt4 || isProcessing">
                 {{ isProcessing ? "Flashing..." : "Flash Files" }}
