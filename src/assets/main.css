@@ -2,7 +2,11 @@
 
 #app {
   max-width: 1280px;
-  margin: 0 auto;
+  margin: auto;
+  justify-content: center;
+  align-items: center;
+  display: flex; /* Center the app div */
+  height: 100vh; /* Full viewport height */
   padding: 2rem;
   font-weight: normal;
 }
@@ -28,8 +32,7 @@ a,
   }
 
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     padding: 0 2rem;
   }
 }

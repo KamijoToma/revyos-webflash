@@ -1,84 +1,105 @@
-<!-- filepath: /workspaces/webusb-fastboot/src/components/FastBootFlash.vue -->
 <template>
-    <div class="fastboot-flash">
-        <h1>Fastboot Flashing</h1>
+    <n-card title="RevyOS Fastboot Flash Utility" class="fastboot-flash">
+        <n-scrollbar class="steps-container" x-scrollable>
+            <n-steps :current="currentStep" size="small" class="steps">
+            <n-step title="Connect Stage 1" />
+            <n-step title="Flash uboot" />
+            <n-step title="Reboot to Stage 2" />
+            <n-step title="Connect Stage 2" />
+            <n-step title="Flash images" />
+            <n-step title="Reboot" />
+            </n-steps>
+        </n-scrollbar>
         <div v-if="currentStep === 1">
-            <h2>Step 1: Connect to Stage 1 USB Device</h2>
-            <button @click="connectToDevice" :disabled="isProcessing">
-                {{ isProcessing ? "Connecting..." : "Connect" }}
-            </button>
+            <n-card title="Step 1: Connect to Stage 1 USB Device">
+                <n-button @click="connectToDevice" :loading="isProcessing" type="primary">
+                    {{ isProcessing ? "Connecting..." : "Connect" }}
+                </n-button>
+            </n-card>
         </div>
         <div v-else-if="currentStep === 2">
-            <h2>Step 2: Flash uboot.bin to RAM</h2>
-            <input type="file" @change="onFileSelected('ubootBin', $event)" />
-            <button @click="flashUbootToRam" :disabled="!files.ubootBin || isProcessing">
-                {{ isProcessing ? "Flashing..." : "Flash to RAM" }}
-            </button>
+            <n-card title="Step 2: Flash uboot.bin to RAM">
+                <n-upload v-model:file-list="files.ubootBin" :max="1" accept=".bin" @change="onFileSelected('ubootBin', $event)">
+                    <n-button type="default">Select uboot.bin</n-button>
+                </n-upload>
+                <n-button @click="flashUbootToRam" :disabled="!files.ubootBin || isProcessing" :loading="isProcessing" type="primary">
+                    {{ isProcessing ? "Flashing..." : "Flash to RAM" }}
+                </n-button>
+            </n-card>
         </div>
         <div v-else-if="currentStep === 3">
-            <h2>Step 3: Reboot to Stage 2</h2>
-            <button @click="rebootToStage2" :disabled="isProcessing">
-                {{ isProcessing ? "Rebooting..." : "Reboot" }}
-            </button>
+            <n-card title="Step 3: Reboot to Stage 2">
+                <n-button @click="rebootToStage2" :loading="isProcessing" type="primary">
+                    {{ isProcessing ? "Rebooting..." : "Reboot" }}
+                </n-button>
+            </n-card>
         </div>
         <div v-else-if="currentStep === 4">
-            <h2>Step 4: Connect to Stage 2 USB Device</h2>
-            <button @click="connectToStage2" :disabled="isProcessing">
-                {{ isProcessing ? "Waiting..." : "Connect" }}
-            </button>
+            <n-card title="Step 4: Connect to Stage 2 USB Device">
+                <n-button @click="connectToStage2" :loading="isProcessing" type="primary">
+                    {{ isProcessing ? "Waiting..." : "Connect" }}
+                </n-button>
+            </n-card>
         </div>
         <div v-else-if="currentStep === 5">
-            <h2>Step 5: Flash Files to Device</h2>
-            <label>uboot.bin:</label>
-            <input type="file" @change="onFileSelected('ubootBin', $event)" />
-            <br>
-            <label>boot.ext4:</label>
-            <input type="file" @change="onFileSelected('bootExt4', $event)" />
-            <br>
-            <label>root.ext4:</label>
-            <input type="file" @change="onFileSelected('rootExt4', $event)" />
-            <br>
-            <button @click="flashFilesToDevice"
-                :disabled="!files.ubootBin || !files.bootExt4 || !files.rootExt4 || isProcessing">
-                {{ isProcessing ? "Flashing..." : "Flash Files" }}
-            </button>
+            <n-card title="Step 5: Flash Files to Device">
+                <n-upload v-model:file-list="files.ubootBin" :max="1" accept=".bin" @change="onFileSelected('ubootBin', $event)">
+                    <n-button type="default">Select uboot.bin</n-button>
+                </n-upload>
+                <n-upload v-model:file-list="files.bootExt4" :max="1" accept=".ext4" @change="onFileSelected('bootExt4', $event)">
+                    <n-button type="default">Select boot.ext4</n-button>
+                </n-upload>
+                <n-upload v-model:file-list="files.rootExt4" :max="1" accept=".ext4" @change="onFileSelected('rootExt4', $event)">
+                    <n-button type="default">Select root.ext4</n-button>
+                </n-upload>
+                <n-button @click="flashFilesToDevice" :disabled="!files.ubootBin || !files.bootExt4 || !files.rootExt4 || isProcessing" :loading="isProcessing" type="primary">
+                    {{ isProcessing ? "Flashing..." : "Flash Files" }}
+                </n-button>
+            </n-card>
         </div>
         <div v-else-if="currentStep === 6">
-            <h2>Step 6: Reboot Device</h2>
-            <button @click="rebootDevice" :disabled="isProcessing">
-                {{ isProcessing ? "Rebooting..." : "Reboot" }}
-            </button>
+            <n-card title="Step 6: Reboot Device">
+                <n-button @click="rebootDevice" :loading="isProcessing" type="primary">
+                    {{ isProcessing ? "Rebooting..." : "Reboot" }}
+                </n-button>
+            </n-card>
         </div>
-        <div v-if="status" class="status">{{ status }}</div>
+        <n-alert v-if="status" type="info" class="status">{{ status }}</n-alert>
         <div class="navigation">
-            <button @click="prevStep" :disabled="currentStep === 1 || isProcessing">Previous</button>
-            <button @click="nextStep" :disabled="currentStep === 6 || isProcessing">Next</button>
+            <n-button @click="prevStep" :disabled="currentStep === 1 || isProcessing">Previous</n-button>
+            <n-button @click="nextStep" :disabled="currentStep === 6 || isProcessing">Next</n-button>
         </div>
-    </div>
+    </n-card>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 import * as fastboot from "android-fastboot-ts";
+import { NCard, NSteps, NStep, NButton, NUpload, NAlert, NScrollbar, type UploadFileInfo } from "naive-ui";
 
 const currentStep = ref(1);
 const isProcessing = ref(false);
 const status = ref("");
-const files = ref<{ [key: string]: File | null }>({
-    ubootBin: null,
-    bootExt4: null,
-    rootExt4: null,
+const files = ref<{ [key: string]: UploadFileInfo[] }>({
+    ubootBin: [],
+    bootExt4: [],
+    rootExt4: [],
 });
 const device = new fastboot.FastbootDevice();
 
 // Enable verbose debug logging
 fastboot.setDebugLevel(2);
 
-function onFileSelected(key: string, event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-        files.value[key] = input.files[0];
-    }
+function onFileSelected(key: string, event: { file: UploadFileInfo }) {
+    const { file } = event;
+    files.value[key] = [
+        {
+            id: Date.now().toString(),
+            name: file.name,
+            status: 'finished',
+            file: file.file as File,
+        },
+    ];
 }
 
 async function connectToDevice() {
@@ -101,7 +122,7 @@ async function flashUbootToRam() {
     isProcessing.value = true;
     status.value = "Flashing uboot.bin to RAM...";
     try {
-        await device.flashBlob("ram", files.value.ubootBin);
+        await device.flashBlob("ram", files.value.ubootBin[0].file as Blob);
         status.value = "Flashed uboot.bin to RAM successfully.";
     } catch (error: any) {
         status.value = `Error: ${error.message}`;
@@ -149,9 +170,9 @@ async function flashFilesToDevice() {
     isProcessing.value = true;
     status.value = "Flashing files to device...";
     try {
-        await device.flashBlob("uboot", files.value.ubootBin);
-        await device.flashBlob("boot", files.value.bootExt4);
-        await device.flashBlob("root", files.value.rootExt4);
+        await device.flashBlob("uboot", files.value.ubootBin[0].file as Blob);
+        await device.flashBlob("boot", files.value.bootExt4[0].file as Blob);
+        await device.flashBlob("root", files.value.rootExt4[0].file as Blob);
         status.value = "Flashed all files successfully.";
     } catch (error: any) {
         status.value = `Error: ${error.message}`;
@@ -184,24 +205,29 @@ function prevStep() {
 
 <style scoped>
 .fastboot-flash {
-    text-align: center;
-    margin-top: 20px;
+    width: 100%; /* Take full width of the container */
+    max-width: 100vw; /* Limit the maximum width */
+    margin: 20px auto;
+    box-sizing: border-box; /* Include padding and border in size */
 }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin: 10px;
+.steps-container {
+    overflow-x: auto;
+    padding: 0 20px;
+}
+
+.steps {
+    margin: 10px 5px;
+    /* min-width: 600px; Adjust as needed */
 }
 
 .status {
     margin-top: 20px;
-    font-size: 14px;
-    color: #555;
 }
 
 .navigation {
     margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
 }
 </style>
